@@ -185,24 +185,66 @@
     <script>
       const socket = io();
 
+      const peer = new RTCPeerConnection();
+
       const videoTag = document.getElementById("video");
 
       const btnTransmitir = document.getElementById("btnTransmitir");
+      const btnAssistir = document.getElementById("btnAssistir");
 
       btnTransmitir.addEventListener("click", async (e) => {
-        if (!("getDisplayMedia" in navigator.mediaDevices)) return;
+        try {
+          if (!("getDisplayMedia" in navigator.mediaDevices)) return;
 
-        const stream = await navigator.mediaDevices.getDisplayMedia({
-          video: {
-            displaySurface: "monitor",
-          },
-          audio: true,
-          surfaceSwitching: "include",
-          systemAudio: "include",
-        });
+          let localStream = await navigator.mediaDevices.getDisplayMedia({
+            video: {
+              displaySurface: "monitor",
+            },
+            surfaceSwitching: "include",
+            systemAudio: "include",
+          });
 
-        videoTag.srcObject = stream;
+          peer.addTrack(localStream.getVideoTracks()[0], localStream);
+
+          const offer = await peer.createOffer();
+
+          await peer.setLocalDescription(offer);
+
+          socket.emit("offer", offer);
+        } catch (error) {
+          console.error(error);
+          alert(error);
+        }
+      });
+
+      btnAssistir.addEventListener("click", () => {
         videoTag.play();
+      });
+
+      peer.addEventListener("icecandidate", (e) => {
+        if (e.candidate) socket.emit("ice-candidate", e.candidate);
+      });
+
+      socket.on("offer", async (offer) => {
+        await peer.setRemoteDescription(offer);
+
+        const answer = await peer.createAnswer();
+
+        await peer.setLocalDescription(answer);
+
+        socket.emit("answer", answer);
+      });
+
+      socket.on("answer", async (answer) => {
+        await peer.setRemoteDescription(answer);
+      });
+
+      socket.on("ice-candidate", async (candidate) => {
+        await peer.addIceCandidate(candidate);
+      });
+
+      peer.addEventListener("track", (track) => {
+        videoTag.srcObject = track.streams[0];
       });
     </script>
   </body>

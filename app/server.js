@@ -19,8 +19,22 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
   console.log("a user connected");
 
-  socket.on("disconnect", () => {
-    console.log("user disconnected");
+  socket.on("offer", (offer) => {
+    console.log(offer);
+
+    socket.broadcast.emit("offer", offer);
+  });
+
+  socket.on("answer", (answer) => {
+    console.log(answer);
+
+    socket.broadcast.emit("answer", answer);
+  });
+
+  socket.on("ice-candidate", (candidate) => {
+    console.log(candidate);
+
+    socket.broadcast.emit("ice-candidate", candidate);
   });
 });
 
