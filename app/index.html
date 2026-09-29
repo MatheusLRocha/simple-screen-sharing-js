@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Compartilhamento de Tela</title>
+
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background: #111315;
+        color: #e7e7e7;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      .container {
+        width: min(900px, 92%);
+        padding: 32px;
+
+        background: #1a1d20;
+        border: 1px solid #303438;
+        border-radius: 8px;
+      }
+
+      .header {
+        margin-bottom: 24px;
+      }
+
+      .header h1 {
+        font-size: 26px;
+        margin-bottom: 8px;
+      }
+
+      .header p {
+        color: #9da2a7;
+        font-size: 15px;
+      }
+
+      .screen {
+        height: 420px;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        background: #0d0f10;
+        border: 1px solid #303438;
+        border-radius: 6px;
+
+        color: #9da2a7;
+      }
+
+      #video {
+        width: 100%;
+        height: 100%;
+      }
+
+      .screen-icon {
+        width: 60px;
+        height: 45px;
+        margin-bottom: 20px;
+
+        border: 3px solid #777d82;
+        border-radius: 5px;
+
+        position: relative;
+      }
+
+      .screen-icon::after {
+        content: "";
+
+        position: absolute;
+        width: 20px;
+        height: 3px;
+
+        background: #777d82;
+        bottom: -9px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .screen p {
+        font-size: 16px;
+      }
+
+      .screen span {
+        margin-top: 8px;
+        color: #666c71;
+        font-size: 14px;
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+
+        margin-top: 20px;
+      }
+
+      button {
+        height: 52px;
+
+        border: 1px solid #3a3e42;
+        border-radius: 6px;
+
+        background: #25292d;
+        color: #e7e7e7;
+
+        font-size: 15px;
+        font-weight: 600;
+
+        cursor: pointer;
+        transition:
+          background 0.15s ease,
+          border-color 0.15s ease;
+      }
+
+      button:hover {
+        background: #30353a;
+        border-color: #50555a;
+      }
+
+      .transmitir {
+        background: #e5e5e5;
+        color: #151719;
+        border-color: #e5e5e5;
+      }
+
+      .transmitir:hover {
+        background: #ffffff;
+        border-color: #ffffff;
+      }
+
+      @media (max-width: 650px) {
+        .container {
+          padding: 20px;
+        }
+
+        .screen {
+          height: 320px;
+        }
+
+        .controls {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="container">
+      <header class="header">
+        <h1>Compartilhamento de Tela</h1>
+        <p>
+          Compartilhe sua tela com outras pessoas de forma simples e segura.
+        </p>
+      </header>
+
+      <section class="screen">
+        <video id="video"></video>
+      </section>
+
+      <div class="controls">
+        <button class="transmitir" id="btnTransmitir">Transmitir</button>
+
+        <button id="btnAssistir">Assistir</button>
+
+        <button id="btnPausar">Pausar</button>
+      </div>
+    </main>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+
+      const videoTag = document.getElementById("video");
+
+      const btnTransmitir = document.getElementById("btnTransmitir");
+
+      btnTransmitir.addEventListener("click", async (e) => {
+        if (!("getDisplayMedia" in navigator.mediaDevices)) return;
+
+        const stream = await navigator.mediaDevices.getDisplayMedia({
+          video: {
+            displaySurface: "monitor",
+          },
+          audio: true,
+          surfaceSwitching: "include",
+          systemAudio: "include",
+        });
+
+        videoTag.srcObject = stream;
+        videoTag.play();
+      });
+    </script>
+  </body>
+</html>
