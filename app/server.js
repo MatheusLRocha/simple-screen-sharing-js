@@ -17,27 +17,21 @@ app.get("/", (req, res) => {
 });
 
 io.on("connection", (socket) => {
-  console.log("a user connected");
+  console.log("a user connected ", socket.id);
 
   socket.on("offer", (offer) => {
-    console.log(offer);
-
     socket.broadcast.emit("offer", offer);
   });
 
   socket.on("answer", (answer) => {
-    console.log(answer);
-
     socket.broadcast.emit("answer", answer);
   });
 
   socket.on("ice-candidate", (candidate) => {
-    console.log(candidate);
-
     socket.broadcast.emit("ice-candidate", candidate);
   });
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`server running at http://localhost:${PORT}`);
 });
